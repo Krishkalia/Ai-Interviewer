@@ -6,7 +6,7 @@ export function AppProvider({ children }) {
   const [screen, setScreen] = useState('prepare')          // 'prepare' | 'interview' | 'feedback'
   const [apiKey, setApiKey] = useState('')
   const [elevenLabsKey, setElevenLabsKey] = useState('')
-  const [agentId, setAgentId] = useState('agent_9301kmzxwpsmept9ftpkfsmey78v')
+  const [agentId, setAgentId] = useState(import.meta.env.VITE_ELEVENLABS_AGENT_ID || '')
   const [lang, setLang] = useState('English')
   const [role, setRole] = useState('Software Engineer')
   const [resumeData, setResumeData] = useState(null)       // parsed resume JSON

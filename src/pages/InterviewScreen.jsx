@@ -97,8 +97,8 @@ export default function InterviewScreen() {
 
   useEffect(() => {
     return () => {
-      // Only call stop if we aren't already finishing manually
-      if (!isFinishingRef.current) {
+      // Only call stop if we aren't already finishing manually and session was actually started
+      if (!isFinishingRef.current && hasStartedRef.current) {
         stopRef.current?.().catch(e => console.warn('Cleanup stop failed', e))
       }
     }
