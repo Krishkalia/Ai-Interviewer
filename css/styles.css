@@ -1,0 +1,121 @@
+/* ========================
+   Cognitive Echo Global Styles
+   ======================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  min-height: 100dvh;
+  background: #0b1326;
+  color: #dae2fd;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ---- Grid Background ---- */
+.bg-grid-subtle {
+  background-image: radial-gradient(circle at 2px 2px, rgba(192,193,255,0.05) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+/* ---- Glow Effects ---- */
+.neon-glow {
+  box-shadow: 0 0 20px rgba(192,193,255,0.4);
+}
+.neon-glow:hover {
+  box-shadow: 0 0 35px rgba(192,193,255,0.6);
+}
+
+/* ---- Glass Panel ---- */
+.glass-panel {
+  background: rgba(34, 42, 61, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ---- Navigation ---- */
+.nav-link { transition: color 0.3s; }
+.active-nav { color: #c0c1ff !important; }
+.inactive-nav { color: #64748b; }
+
+/* ---- Language Buttons ---- */
+.selected-lang {
+  background: #c0c1ff;
+  color: #1000a9;
+}
+.unselected-lang {
+  background: #222a3d;
+  color: #c7c4d7;
+}
+.unselected-lang:hover { background: #2d3449; }
+
+/* ---- Screen Transitions ---- */
+.screen { transition: opacity 0.35s ease; }
+.screen.hidden { display: none !important; }
+
+/* ---- Mic States ---- */
+#mic-btn.listening {
+  background: linear-gradient(135deg, #ffb783, #d97721);
+  box-shadow: 0 0 30px rgba(255,183,131,0.5);
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+#mic-btn.muted {
+  background: #222a3d;
+  color: #c7c4d7;
+  box-shadow: none;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ---- Avatar Speaking Animation ---- */
+@keyframes speak-ring {
+  0%   { r: 96; opacity: 0.4; }
+  100% { r: 115; opacity: 0; }
+}
+@keyframes speak-ring-2 {
+  0%   { r: 96; opacity: 0.25; }
+  100% { r: 130; opacity: 0; }
+}
+
+.wave-ring  { animation: speak-ring 1.8s ease-out infinite; }
+.wave-ring-2 { animation: speak-ring-2 1.8s ease-out 0.6s infinite; }
+
+/* ---- Parse Status Spinner ---- */
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1s linear infinite; }
+
+/* ---- Confidence Bar Pulse ---- */
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.6 } }
+.animate-pulse { animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite; }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0b1326; }
+::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #464554; }
+
+/* ---- Asymmetric Chat Bubble ---- */
+.asymmetric-bubble { border-radius: 1.5rem 1.5rem 1.5rem 0; }
+
+/* ---- Transcript Text ---- */
+#live-transcript {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ---- Score Bars Animation ---- */
+.score-bar { transition: width 1.2s cubic-bezier(.25,.46,.45,.94); }
+
+/* ---- Session timer font ---- */
+#session-timer { font-variant-numeric: tabular-nums; }
+
+/* ---- Mobile only ---- */
+@media (max-width: 768px) {
+  .fixed.left-4.top-20 { left: 0.5rem; top: 5rem; }
+  .fixed.right-4.top-20 { right: 0.5rem; top: 5rem; }
+  #screen-interview main { padding-bottom: 10rem; }
+}

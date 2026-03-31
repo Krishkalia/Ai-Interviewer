@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-body min-h-screen overflow-x-hidden;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-background; }
+  ::-webkit-scrollbar-thumb { @apply bg-surface-variant rounded-full; }
+}
+
+@layer components {
+  .bg-grid-subtle {
+    background-image: radial-gradient(circle at 2px 2px, rgba(192,193,255,0.05) 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(192,193,255,0.4);
+  }
+  .neon-glow:hover {
+    box-shadow: 0 0 35px rgba(192,193,255,0.6);
+  }
+  .glass-panel {
+    background: rgba(34, 42, 61, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .asymmetric-bubble {
+    border-radius: 1.5rem 1.5rem 1.5rem 0;
+  }
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+}
+
+/* Mic pulse animation */
+@keyframes micPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.mic-listening {
+  animation: micPulse 1.2s ease-in-out infinite;
+  background: linear-gradient(135deg, #ffb783, #d97721) !important;
+  box-shadow: 0 0 30px rgba(255,183,131,0.5) !important;
+}
+
+/* Avatar wave rings */
+@keyframes waveRing {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+.wave-ring {
+  animation: waveRing 1.8s ease-out infinite;
+}
+.wave-ring-2 {
+  animation: waveRing 1.8s ease-out 0.6s infinite;
+}
+
+/* Score counter animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.count-anim { animation: countUp 0.4s ease forwards; }
+
+/* Transcript scroll */
+.transcript-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cognitive Echo - Interview Room</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#2d3449",
+              "on-background": "#dae2fd",
+              "tertiary": "#ffb783",
+              "on-secondary-fixed-variant": "#404178",
+              "secondary-fixed-dim": "#c0c1ff",
+              "inverse-surface": "#dae2fd",
+              "on-primary-fixed": "#07006c",
+              "surface-tint": "#c0c1ff",
+              "surface-bright": "#31394d",
+              "on-primary-container": "#0d0096",
+              "tertiary-container": "#d97721",
+              "on-secondary": "#292a60",
+              "surface-container-highest": "#2d3449",
+              "on-surface": "#dae2fd",
+              "surface-container-low": "#131b2e",
+              "primary-fixed-dim": "#c0c1ff",
+              "on-primary-fixed-variant": "#2f2ebe",
+              "tertiary-fixed": "#ffdcc5",
+              "surface-container-high": "#222a3d",
+              "on-primary": "#1000a9",
+              "error": "#ffb4ab",
+              "surface-container": "#171f33",
+              "background": "#0b1326",
+              "inverse-on-surface": "#283044",
+              "surface": "#0b1326",
+              "primary-fixed": "#e1e0ff",
+              "on-tertiary-fixed": "#301400",
+              "surface-container-lowest": "#060e20",
+              "surface-dim": "#0b1326",
+              "error-container": "#93000a",
+              "inverse-primary": "#494bd6",
+              "primary-container": "#8083ff",
+              "on-error-container": "#ffdad6",
+              "outline": "#908fa0",
+              "on-tertiary-container": "#452000",
+              "secondary-container": "#42447b",
+              "secondary": "#c0c1ff",
+              "on-tertiary": "#4f2500",
+              "on-error": "#690005",
+              "secondary-fixed": "#e1e0ff",
+              "tertiary-fixed-dim": "#ffb783",
+              "outline-variant": "#464554",
+              "on-tertiary-fixed-variant": "#703700",
+              "on-secondary-container": "#b2b3f2",
+              "on-secondary-fixed": "#13144a",
+              "on-surface-variant": "#c7c4d7",
+              "primary": "#c0c1ff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mic-glow {
+            box-shadow: 0 0 40px rgba(192, 193, 255, 0.3);
+        }
+        .ai-avatar-container {
+            perspective: 1000px;
+        }
+        .glass-panel {
+            background: rgba(34, 42, 61, 0.6);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 w-full z-50">
+<div class="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-indigo-400 dark:text-indigo-300" data-icon="psychology">psychology</span>
+<span class="text-xl font-manrope font-bold tracking-tight bg-gradient-to-br from-[#c0c1ff] to-[#8083ff] bg-clip-text text-transparent">Cognitive Echo</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-[#c0c1ff] font-bold font-manrope text-sm hover:text-indigo-200 transition-colors duration-300" href="#">Interview</a>
+<a class="text-slate-400 font-manrope text-sm hover:text-indigo-200 transition-colors duration-300" href="#">Prepare</a>
+<a class="text-slate-400 font-manrope text-sm hover:text-indigo-200 transition-colors duration-300" href="#">Feedback</a>
+</nav>
+<div class="h-8 w-8 rounded-full bg-surface-container-highest overflow-hidden ring-2 ring-primary/20">
+<img class="w-full h-full object-cover" data-alt="User profile avatar circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr-h3ajJE0KUnN-vRSKGsIaX79VIxmUcQDqP9ilgGDAesXGCOoS0EHq_yj3H3jU8Efl4Urr2bxZ747mop8jMAbes1pf4Swx4l3shQT0bBubrc_5F0sdXhO4MWYYfE4CQ11IlqJOA1s9Yx1mYgAYD62ueIgX6bLeGg-0e-bosLKd7NKKwPRgXNQFt6ClDrXMGwbVzLUDZYY4_eF2rSxfwL27L7ved65TEcNpWAFx2CD5nYkOicvoBIwHbob_WawBsJ5XjruuBWuSw"/>
+</div>
+</div>
+</div>
+</header>
+<main class="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+<!-- Cinematic Background/Studio -->
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-b from-background via-surface-container-lowest/40 to-background z-10"></div>
+<img class="w-full h-full object-cover opacity-30 grayscale brightness-50" data-alt="Modern futuristic office with cinematic neon lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7ZkJNY-bJsBJCAUw6sMNEJDX8PbqKbb9y38kb8BV97ir6pkMuyQPWrIGcERYb0BkbILyVs1U8XYGRR3125Ha4Mc-mayVgi7L-Z0Z75O-4_jtAr1LYbSVGLzrSm9qj_1hHFQiAp4RlrMagcF7PjxWDUxSntC9TkY8ymFLdIFCK9Gm-kThnq_s6FN1mlr0dW4ht8ffamsyJV1yZnahM0JOi6PzulHRgTZ8oFUXGOGVbpBisV7wupFLgnVvcdfzjNLI0F2WEesrmag"/>
+<!-- Atmospheric Glows -->
+<div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-tertiary/5 rounded-full blur-[100px]"></div>
+</div>
+<!-- Minimalist HUD: Left -->
+<div class="fixed left-8 top-24 z-30 flex flex-col gap-6">
+<div class="glass-panel p-4 rounded-xl flex flex-col gap-1 border-l-2 border-primary">
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Session Duration</span>
+<span class="font-headline font-bold text-2xl text-primary">14:22</span>
+</div>
+<div class="glass-panel p-4 rounded-xl flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-xs font-medium text-on-surface">AI is Listening...</span>
+</div>
+</div>
+</div>
+<!-- Minimalist HUD: Right -->
+<div class="fixed right-8 top-24 z-30 flex flex-col gap-4">
+<div class="glass-panel p-4 rounded-xl flex flex-col items-end gap-2">
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Confidence Score</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline font-bold text-2xl text-tertiary">92</span>
+<span class="text-xs text-on-surface-variant">%</span>
+</div>
+<div class="w-32 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[92%]"></div>
+</div>
+</div>
+</div>
+<!-- Central AI Interviewer Avatar -->
+<div class="relative z-20 ai-avatar-container flex flex-col items-center">
+<div class="relative group">
+<!-- Avatar Glow -->
+<div class="absolute -inset-4 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all duration-700"></div>
+<!-- The 3D Humanoid Avatar Simulation -->
+<div class="relative w-[320px] h-[320px] md:w-[480px] md:h-[480px] rounded-full overflow-hidden border-4 border-surface-container-highest/50 shadow-2xl">
+<img class="w-full h-full object-cover scale-110 hover:scale-100 transition-transform duration-[3000ms]" data-alt="Realistic attentive human-like AI interviewer avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0w-edbhkWRwP8CzTbkGqBE8T7iiTJ7iiYItI3MZbhw04shmz6KdArBuvoqWihIJXC1YFfd8Vw3VotEtTho3Vmc0XsBOv--EY7HGhcgolCwOvs11a_HEHBKCClJkJgp-Jg8MFMSbyhBYT_vviPCm6N2PXGKlBLofC66_cyTQq7txB3fTsg-moOa8h2xFhf9Av-kGkpEV9gBQy-mVyoMak37t_tPmi4pzaTKndGEKz7iE5InvG7ODnBhVKOTuTpf42qhwD0D8L4rA"/>
+<!-- Digital Overlay on Avatar -->
+<div class="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent"></div>
+<div class="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
+<div class="w-full h-full bg-[radial-gradient(circle,transparent_20%,#000_100%)]"></div>
+</div>
+</div>
+</div>
+<!-- AI Subtitles Overlay -->
+<div class="mt-12 max-w-2xl px-6 text-center">
+<p class="text-xl md:text-2xl font-headline font-medium text-on-surface leading-relaxed drop-shadow-lg">
+                    "That's a profound approach to systems architecture. How do you handle scalability bottlenecks in high-latency environments?"
+                </p>
+</div>
+</div>
+<!-- Bottom Controls & Transcript -->
+<div class="fixed bottom-0 left-0 w-full z-40 px-6 pb-12 flex flex-col items-center gap-8">
+<!-- Real-time User Transcript -->
+<div class="w-full max-w-3xl glass-panel px-6 py-4 rounded-2xl flex items-start gap-4">
+<span class="material-symbols-outlined text-primary mt-1" data-icon="account_circle">account_circle</span>
+<div class="flex-1">
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1 block">Live Transcript</span>
+<p class="text-on-surface-variant font-medium italic">
+                        "In those scenarios, I usually implement a circuit breaker pattern coupled with distributed caching to ensure the system remains responsive even under heavy load..."
+                    </p>
+</div>
+</div>
+<!-- Interaction Row -->
+<div class="flex items-center gap-12">
+<!-- Secondary Action -->
+<button class="w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="videocam_off">videocam_off</span>
+</button>
+<!-- Glowing Microphone Button -->
+<div class="relative group">
+<div class="absolute -inset-6 bg-primary/30 rounded-full blur-2xl group-hover:bg-primary/50 transition-all duration-500 animate-pulse"></div>
+<button class="relative z-10 w-20 h-20 rounded-full bg-gradient-to-br from-[#c0c1ff] to-[#8083ff] flex items-center justify-center text-[#1000a9] mic-glow transition-transform active:scale-90 duration-200">
+<span class="material-symbols-outlined text-4xl" data-icon="mic" data-weight="fill" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</div>
+<!-- Secondary Action -->
+<button class="w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Navigation Bar (Hidden on Desktop, Visible for Mobile Destinations) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#0b1326]/60 backdrop-blur-xl rounded-t-2xl shadow-[0_-4px_24px_rgba(73,75,214,0.06)]">
+<a class="flex flex-col items-center justify-center text-slate-500 hover:bg-[#131b2e] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="upload_file">upload_file</span>
+<span class="font-inter text-xs font-medium">Prepare</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#222a3d] text-[#c0c1ff] rounded-xl px-4 py-1 Active: scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+<span class="font-inter text-xs font-medium">Interview</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:bg-[#131b2e] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-inter text-xs font-medium">Feedback</span>
+</a>
+</nav>
+</body></html>
