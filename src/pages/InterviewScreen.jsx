@@ -4,30 +4,24 @@ import { useSpeech } from '../hooks/useSpeech'
 import { generateReport } from '../utils/gemini'
 import Swal from 'sweetalert2'
 
-// ─── Animated AI Avatar ───────────────────────────────
+// ─── Components ───────────────────────────────────────
 import { ThreeDAvatar } from '../components/ThreeDAvatar'
+import { UserCamera } from '../components/UserCamera'
 
-// ─── Interview Screen ─────────────────────────────────
-
-// ─── Interview Screen ─────────────────────────────────
 export default function InterviewScreen() {
   const { apiKey, role, resumeData, selectedMic, setSelectedMic, setReport, setScreen, convError, setConvError } = useApp()
-  const { startSession, stopSession, isSpeaking, isListening, transcript, history, questionCount, isAutoEnding, detectEmotion, status, isMuted, setMuted } = useSpeech()
+  const { startSession, stopSession, isSpeaking, isUserSpeaking, transcript, history, questionCount, status, isMuted, setMuted } = useSpeech()
  
-  const [aiStatusLabel, setAiStatusLabel] = useState('Connecting…')
-  const [confidence, setConfidence] = useState(null)
-  const [emotion, setEmotion] = useState(null)
   const [timer, setTimer] = useState('00:00')
   const [devices, setDevices] = useState([])
   const [showMicSettings, setShowMicSettings] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
   const [sessionStarted, setSessionStarted] = useState(false)
+  const [isCameraOff, setIsCameraOff] = useState(false)
   
-  const hasConnectedRef = useRef(false)
-  const sessionStartRef = useRef(Date.now())
+  const hStartedRef = useRef(false)
   const timerRef = useRef(null)
-  const isFinishingRef = useRef(false)
- 
+  
   // ── Enumerate Devices ──
   useEffect(() => {
     async function getDevices() {
@@ -35,322 +29,173 @@ export default function InterviewScreen() {
         const devs = await navigator.mediaDevices.enumerateDevices()
         const audioIn = devs.filter(d => d.kind === 'audioinput')
         setDevices(audioIn)
-        // Set default if none selected
-        if (!selectedMic && audioIn.length > 0) {
-          setSelectedMic(audioIn[0].deviceId)
-        }
-      } catch (err) {
-        console.warn('Device enumeration failed', err)
-      }
+        if (!selectedMic && audioIn.length > 0) setSelectedMic(audioIn[0].deviceId)
+      } catch (err) {}
     }
     getDevices()
   }, [selectedMic, setSelectedMic])
 
-  // ── Timer Start only on Connect ──
+  // ── Timer Logic ──
   useEffect(() => {
-    if (status === 'connected' && !timerRef.current) {
-        hasConnectedRef.current = true
-        sessionStartRef.current = Date.now()
+    if (status === 'connected') {
+        const start = Date.now()
         timerRef.current = setInterval(() => {
-          const s = Math.floor((Date.now() - sessionStartRef.current) / 1000)
+          const s = Math.floor((Date.now() - start) / 1000)
           setTimer(`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`)
         }, 1000)
     }
-    return () => {
-        if (!isFinishingRef.current && timerRef.current) {
-            // Clean up timer on unmount if not already finishing
-            // Actually finish() will handle this, but it's good to clear it.
-        }
-    }
+    return () => clearInterval(timerRef.current)
   }, [status])
 
-  // ── Start Interview logic ──
-  const hasStartedRef = useRef(false)
+  // ── Session Trigger ──
   useEffect(() => {
-    if (!sessionStarted || hasStartedRef.current) return
-    hasStartedRef.current = true
-    if (!apiKey || !resumeData) {
-      setConvError('Missing configuration or resume data.')
-      return
+    if (sessionStarted && !hStartedRef.current) {
+      hStartedRef.current = true
+      startSession(resumeData, role).catch(e => setConvError(e.message))
     }
-    startSession(resumeData, role).catch(e => {
-        console.error('Session start error', e)
-        setConvError(e.message || 'Failed to start session')
-    })
-  }, [sessionStarted, startSession, resumeData, role, apiKey, setConvError])
-
-  const handleStartSession = () => {
-    setSessionStarted(true)
-  }
-
-  // ── Handle Disconnect / End ──
-  // Removed automatic finish() on 'disconnected' status to prevent 
-  // navigating to the feedback screen when an initialization error occurs.
-  // Finish will now be triggered ONLY by:
-  // 1. Manual click on "End Session"
-  // 2. AI Farewell detection (isAutoEnding)
-
-  // ── Cleanup on Unmount ──
-  // Use a ref to ensure we have the stable function for the final unmount
-  const stopRef = useRef(stopSession)
-  useEffect(() => { stopRef.current = stopSession }, [stopSession])
-
-  useEffect(() => {
-    return () => {
-      // Only call stop if we aren't already finishing manually and session was actually started
-      if (!isFinishingRef.current && hasStartedRef.current) {
-        stopRef.current?.().catch(e => console.warn('Cleanup stop failed', e))
-      }
-    }
-  }, []) // Empty array ensures this ONLY runs when leaving the screen
-
-  // ── Detect Auto-End (Farewell) ──
-  useEffect(() => {
-    if (isAutoEnding && isSpeaking === false && !isFinishingRef.current) {
-        // Wait 1.5s after the AI finishes saying goodbye before wrapping up
-        setTimeout(() => {
-           finish()
-        }, 1500)
-    }
-  }, [isAutoEnding, isSpeaking, finish])
-
-  // ── Emotion Detection on transcript change ──
-  useEffect(() => {
-    if (transcript && detectEmotion) {
-      const em = detectEmotion(transcript)
-      if (em) {
-        setEmotion(em.label)
-        setConfidence(prev => {
-          const scores = [...(prev ? [prev] : []), em.score]
-          return Math.round(scores.reduce((a,b)=>a+b,0)/scores.length)
-        })
-      }
-    }
-  }, [transcript, detectEmotion])
-
-  useEffect(() => {
-    if (status === 'connected') {
-      setAiStatusLabel(isSpeaking ? 'AI is speaking…' : 'Listening…')
-    } else if (status === 'connecting') {
-      setAiStatusLabel('Connecting…')
-    } else {
-      setAiStatusLabel('Disconnected')
-    }
-  }, [status, isSpeaking])
+  }, [sessionStarted, startSession, resumeData, role, setConvError])
 
   async function finish() {
-    if (isFinishingRef.current) return
-    isFinishingRef.current = true
     setIsEnding(true)
-    setAiStatusLabel('Ending Session…')
     clearInterval(timerRef.current)
+    try { await stopSession() } catch (e) {}
     
-    try {
-      await stopSession()
-    } catch (e) {
-      console.warn('Error stopping session', e)
-    }
-    
-    setAiStatusLabel('Analyzing…')
-    
-    // Check if session ended before conversation even reached the user
-    // history includes AI greeting + user messages. Check if user responded at all.
-    const userMessages = history.filter(m => m.role === 'user')
-    
-    if (userMessages.length === 0) {
-      setReport({ error: "Session ended before interview could start. Please try again." })
+    if (history.length <= 1) { 
+      setReport({ error: "Session ended early." })
     } else {
       try {
         const r = await generateReport(history, resumeData, role, apiKey)
         setReport(r)
-      } catch(e) { 
-        console.warn('report err', e)
-        setReport({ error: "Could not generate full report. Please check your internet and try again." })
-      }
+      } catch(e) { setReport({ error: "Report failed." }) }
     }
-    
-    setIsEnding(false)
     setScreen('feedback')
   }
 
   const handleEndManual = async () => {
     const res = await Swal.fire({
-      title: 'End Interview?',
-      text: 'Are you sure you want to exit early? Your report will be generated based on the progress so far.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, End Session',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#ff2052',
-      background: '#1a1d33',
-      color: '#fff'
+      title: 'End Call?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Hang up', confirmButtonColor: '#ff0033', background: '#0a0a0f', color: '#fff'
     })
-
-    if (res.isConfirmed) {
-      finish()
-    }
+    if (res.isConfirmed) finish()
   }
 
-  const statusColors = { 
-    connecting: 'bg-indigo-400 animate-pulse', 
-    connected: isSpeaking ? 'bg-tertiary animate-pulse' : 'bg-primary animate-pulse',
-    disconnected: 'bg-error'
-  }
+  const aiMessage = history.filter(m => m.role !== 'user').slice(-1)[0]?.text
 
   return (
-    <div className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-background">
+    <div className="relative h-screen w-full flex flex-col bg-[#0b1326] text-on-surface overflow-hidden">
+      
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[120px]"/>
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-tertiary/5 rounded-full blur-[100px]"/>
+        <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse"/>
+        <div className="absolute bottom-1/4 right-1/4 w-[700px] h-[700px] bg-tertiary/10 rounded-full blur-[140px] animate-pulse [animation-delay:1.5s]"/>
       </div>
 
-      {/* HUD Left */}
-      <div className="fixed left-3 top-20 z-30 flex flex-col gap-3">
-        <div className="glass-panel p-4 rounded-xl flex flex-col gap-1 border-l-2 border-primary">
-          <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Session</span>
-          <span className="font-headline font-bold text-2xl text-primary tabular-nums">{timer}</span>
+      {/* Header Info Icons */}
+      <div className="absolute top-0 left-0 w-full z-50 p-6 flex justify-between pointer-events-none">
+        <div className="glass-panel px-4 py-2 rounded-full pointer-events-auto border border-white/5 flex items-center gap-3">
+          <div className={`w-2 h-2 rounded-full ${status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-slate-500'}`} />
+          <span className="text-xs font-bold tabular-nums">{timer}</span>
         </div>
-        <div className="glass-panel p-3 rounded-xl flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${convError ? 'bg-error animate-pulse' : (statusColors[status] || 'bg-slate-500')}`}/>
-          <div className="flex flex-col">
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${convError ? 'text-error' : 'text-on-surface'}`}>
-                {convError ? 'Connection Issue' : aiStatusLabel}
-            </span>
-            {convError && (
-              <button 
-                onClick={() => { setConvError(null); setSessionStarted(false); hasStartedRef.current = false; }}
-                className="mt-1 text-[10px] underline text-on-surface hover:text-primary decoration-primary/50 text-left font-bold"
-              >
-                Reset & Retry
-              </button>
-            )}
-          </div>
+        <div className="glass-panel px-4 py-2 rounded-full pointer-events-auto border border-white/5 text-[10px] uppercase font-bold tracking-widest text-[#8083ff]">
+          Que: {Math.min(questionCount, 5)}/5
         </div>
-        <div className="glass-panel p-3 rounded-xl text-center border-l-2 border-tertiary">
-          <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">Progress</span>
-          <span className="font-headline font-bold text-lg text-tertiary">{Math.min(questionCount, 5)}/5</span>
-        </div>
+      </div>
 
-        {/* Mic Settings */}
-        <div className="relative">
-          <button 
-            onClick={() => setShowMicSettings(!showMicSettings)}
-            className={`glass-panel p-3 rounded-xl flex items-center gap-2 hover:bg-surface-container-high transition-colors ${showMicSettings ? 'bg-surface-container-high' : ''}`}
-          >
-            <span className="material-symbols-outlined text-sm">settings_voice</span>
-            <span className="text-[10px] uppercase tracking-widest font-bold">Mic</span>
-          </button>
+      {/* Main Video Call Content - INCREASED SIZE */}
+      <div className="flex-1 w-full max-w-[1540px] mx-auto flex flex-col justify-center px-4 md:px-8 py-10 pb-32 h-full z-20">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center justify-items-center">
           
+          {/* AI Participant Container */}
+          <div className="relative w-full aspect-video bg-[#0a0a0f] rounded-3xl overflow-hidden border-2 transition-all duration-300 shadow-2xl flex flex-col items-center justify-center border-white/5 group">
+             {isSpeaking && (
+               <div className="absolute inset-0 border-4 border-primary/40 rounded-3xl animate-in fade-in duration-500 pointer-events-none shadow-[inset_0_0_40px_rgba(32,32,255,0.2)]" />
+             )}
+             
+             <ThreeDAvatar isSpeaking={isSpeaking} />
+             
+             {/* Interaction Controls Mask */}
+             {!sessionStarted && (
+               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
+                 <button onClick={() => setSessionStarted(true)} className="px-10 py-5 bg-primary text-white rounded-full font-headline font-bold text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4">
+                   <span className="material-symbols-outlined text-3xl">call</span>
+                   Join Meeting
+                 </button>
+               </div>
+             )}
+
+             {/* Internal AI Subtitles Overlay */}
+             {isSpeaking && aiMessage && (
+               <div className="absolute bottom-6 left-0 w-full px-6 z-10 animate-in fade-in slide-in-from-bottom-2">
+                 <div className="glass-panel px-5 py-3 rounded-2xl border border-white/10 text-center backdrop-blur-xl">
+                   <p className="text-sm md:text-base font-bold text-on-surface line-clamp-3">
+                     {aiMessage}
+                   </p>
+                 </div>
+               </div>
+             )}
+
+             <div className="absolute top-4 left-4 glass-panel px-3 py-1.5 rounded-lg flex items-center gap-2">
+               <div className="w-2 h-2 rounded-full bg-primary" />
+               <span className="text-[10px] font-bold uppercase tracking-widest">AVA (AI)</span>
+             </div>
+          </div>
+
+          {/* Candidate Participant Container */}
+          <UserCamera isMuted={isMuted} isCameraOff={isCameraOff} isSpeaking={isUserSpeaking} subtitle={transcript} />
+
+        </div>
+      </div>
+
+      {/* Control Bar */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6 px-10 py-5 glass-panel rounded-full border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
+        <button onClick={() => setIsCameraOff(!isCameraOff)} className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isCameraOff ? 'bg-white/10' : 'bg-[#2a2a35]'}`}>
+          <span className="material-symbols-outlined text-xl">{isCameraOff ? 'videocam_off' : 'videocam'}</span>
+        </button>
+
+        <button onClick={() => setMuted(!isMuted)} disabled={status !== 'connected'} className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${status !== 'connected' ? 'opacity-20' : ''} ${isMuted ? 'bg-error/20 text-error' : 'bg-[#2a2a35] text-white'}`}>
+          <span className="material-symbols-outlined text-xl">{isMuted ? 'mic_off' : 'mic'}</span>
+        </button>
+
+        <div className="w-[1px] h-8 bg-white/10 mx-2" />
+
+        <button onClick={handleEndManual} disabled={isEnding} className="w-16 h-16 rounded-full bg-[#ff0033] text-white shadow-2xl hover:bg-error hover:scale-110 active:scale-95 transition-all flex items-center justify-center">
+          <span className={`material-symbols-outlined text-3xl ${isEnding ? 'animate-spin' : ''}`}>
+            {isEnding ? 'progress_activity' : 'call_end'}
+          </span>
+        </button>
+
+        <div className="w-[1px] h-8 bg-white/10 mx-2" />
+
+        <div className="relative">
+          <button onClick={() => setShowMicSettings(!showMicSettings)} className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${showMicSettings ? 'bg-[#8083ff]' : 'bg-[#2a2a35]'}`}>
+            <span className="material-symbols-outlined text-xl">settings</span>
+          </button>
           {showMicSettings && (
-            <div className="absolute left-0 top-full mt-2 w-64 glass-panel p-3 rounded-xl z-50 animate-in fade-in slide-in-from-top-1">
-              <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-2 block">Select Microphone</span>
-              <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+            <div className="absolute right-0 bottom-full mb-6 w-64 glass-panel p-4 rounded-2xl z-50 border border-white/5 shadow-2xl">
+              <span className="text-[10px] uppercase font-black text-[#8083ff] mb-3 block">Audio Input</span>
+              <div className="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scrollbar">
                 {devices.map(d => (
-                  <button
-                    key={d.deviceId}
-                    onClick={() => { setSelectedMic(d.deviceId); setShowMicSettings(false) }}
-                    className={`text-left text-xs p-2 rounded-lg transition-colors ${selectedMic === d.deviceId ? 'bg-primary text-on-primary' : 'hover:bg-white/5 text-on-surface'}`}
-                  >
-                    {d.label || `Microphone ${d.deviceId.slice(0, 5)}`}
+                  <button key={d.deviceId} onClick={() => { setSelectedMic(d.deviceId); setShowMicSettings(false) }} className={`text-left text-xs p-3 rounded-xl transition-all ${selectedMic === d.deviceId ? 'bg-[#8083ff] text-white' : 'hover:bg-white/5 text-on-surface-variant'}`}>
+                    {d.label || 'Microphone'}
                   </button>
                 ))}
-                {devices.length === 0 && <span className="text-[10px] italic opacity-50">No devices found</span>}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* HUD Right */}
-      <div className="fixed right-3 top-20 z-30 flex flex-col gap-3 items-end">
-        <div className="glass-panel p-4 rounded-xl flex flex-col items-end gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Confidence</span>
-          <div className="flex items-baseline gap-1">
-            <span className="font-headline font-bold text-2xl text-tertiary">{confidence ?? '—'}</span>
-            {confidence && <span className="text-xs text-on-surface-variant">%</span>}
-          </div>
-          <div className="w-24 h-1 bg-surface-container-highest rounded-full overflow-hidden">
-            <div className="h-full bg-tertiary transition-all duration-700" style={{ width: `${confidence ?? 0}%` }}/>
-          </div>
-        </div>
-        {emotion && (
-          <div className="glass-panel p-3 rounded-xl text-right">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">Mood</span>
-            <span className="text-sm text-tertiary font-bold">{emotion}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Avatar Display */}
-      <div className="relative z-20 flex flex-col items-center mt-8 w-full max-w-lg">
-        <ThreeDAvatar isSpeaking={isSpeaking} />
-        
-        {!sessionStarted && (
-           <div className="mt-10 animate-in fade-in zoom-in duration-500">
-             <button
-               onClick={handleStartSession}
-               className="px-10 py-4 bg-primary text-on-primary rounded-full font-headline font-bold text-xl neon-glow hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-3"
-             >
-               <span className="material-symbols-outlined">play_circle</span>
-               Begin Discussion
-             </button>
-             <p className="mt-4 text-xs text-on-surface-variant font-medium opacity-60">Click to initialize voice interviewer</p>
+      {/* Conv Error Overlay */}
+      {convError && (
+        <div className="absolute inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center p-6 text-center">
+           <div className="glass-panel p-8 rounded-3xl border border-error/20 max-w-md animate-in zoom-in duration-300">
+             <span className="material-symbols-outlined text-error text-5xl mb-4">error</span>
+             <h3 className="text-xl font-bold mb-2">Connection Problem</h3>
+             <p className="text-sm text-on-surface-variant mb-6">{convError}</p>
+             <button onClick={() => window.location.reload()} className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all">Reload Session</button>
            </div>
-        )}
-
-        {sessionStarted && (
-          <div className="mt-8 max-w-2xl px-4 text-center animate-in fade-in slide-in-from-bottom-2 duration-700">
-            <p className="text-xl md:text-2xl font-headline font-medium text-on-surface leading-relaxed drop-shadow-lg min-h-[3rem]">
-              {isSpeaking ? 'Interviewer is communicating...' : 'Talk naturally with the AI...'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Controls */}
-      <div className="fixed bottom-0 left-0 w-full z-40 px-6 pb-10 flex flex-col items-center gap-5">
-        {/* Transcript */}
-        <div className="w-full max-w-3xl glass-panel px-6 py-4 rounded-2xl flex items-start gap-4">
-          <span className="material-symbols-outlined text-primary mt-1">account_circle</span>
-          <div className="flex-1 min-w-0">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1 block">Live Transcript</span>
-            <p className="transcript-text text-on-surface-variant italic font-medium">
-              {(isAutoEnding && !isSpeaking) ? 'Finalizing interview...' : (transcript || (status === 'connected' ? 'Listening…' : 'Waiting…'))}
-            </p>
-          </div>
         </div>
-
-        {/* Buttons */}
-        <div className="flex items-center gap-12">
-          <button 
-            onClick={handleEndManual} 
-            disabled={isEnding}
-            title="End interview"
-            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isEnding ? 'bg-surface-variant opacity-50 cursor-not-allowed' : 'bg-error/20 text-error hover:bg-error shadow-lg hover:shadow-error/20'}`}>
-            <span className={`material-symbols-outlined text-3xl ${isEnding ? 'animate-spin' : ''}`}>
-              {isEnding ? 'progress_activity' : 'call_end'}
-            </span>
-          </button>
-
-          {/* Manual Mic Toggle */}
-          <div className="relative">
-            <div className={`absolute -inset-6 rounded-full blur-2xl transition-all duration-500 ${isMuted ? 'bg-error/20' : (isListening ? 'bg-tertiary/30' : 'bg-primary/20')}`}/>
-            <button 
-              onClick={() => setMuted(!isMuted)}
-              disabled={status !== 'connected'}
-              title={isMuted ? "Unmute microphone" : "Mute microphone"}
-              className={`relative z-10 w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-300 shadow-xl border-4 ${status !== 'connected' ? 'opacity-50 grayscale' : ''} ${isMuted ? 'bg-surface-variant text-error border-error/50 scale-95' : 'bg-gradient-to-br from-[#c0c1ff] to-[#8083ff] text-[#1000a9] border-white/30 scale-100 neon-glow hover:scale-105 active:scale-95'}`}>
-               <span className="material-symbols-outlined text-4xl mb-1">
-                 {isMuted ? 'mic_off' : (isSpeaking ? 'volume_up' : 'mic')}
-               </span>
-               <span className="text-[10px] font-bold uppercase tracking-tighter">
-                 {isMuted ? 'Muted' : 'Live'}
-               </span>
-            </button>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }
