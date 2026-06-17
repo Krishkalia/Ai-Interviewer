@@ -70,3 +70,5 @@ To run this application on your local machine:
 - 🐙 GitHub: [https://github.com/Krishkalia/Ai-Interviewer](https://github.com/Krishkalia/Ai-Interviewer)
 
 *This project was developed entirely with zero expenditures using free-tier services.*
+
+
