@@ -1,6 +1,6 @@
 // ── Gemini API helpers ─────────────────────────────────
-// Using gemma-3-27b-it because your API key grants 14,000+ daily requests for it!
-const MODEL = 'gemma-3-27b-it'
+// Using gemini-3.1-flash-lite because your API key grants 14,000+ daily requests for it!
+const MODEL = 'gemini-3.1-flash-lite'
 
 async function callGemini(prompt, apiKey, asJson = true, retries = 2) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`

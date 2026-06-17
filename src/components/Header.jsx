@@ -1,8 +1,8 @@
 import { useApp } from '../context/AppContext'
 
-const SCREENS = ['prepare']
-const LABELS = { prepare: 'Prepare', interview: 'Interview', feedback: 'Feedback' }
-const ICONS  = { prepare: 'upload_file', interview: 'mic', feedback: 'analytics' }
+const SCREENS = ['steps', 'prepare']
+const LABELS = { steps: 'Steps', prepare: 'Prepare', interview: 'Interview', feedback: 'Feedback' }
+const ICONS  = { steps: 'integration_instructions', prepare: 'upload_file', interview: 'mic', feedback: 'analytics' }
 
 export default function Header() {
   const { screen, setScreen } = useApp()

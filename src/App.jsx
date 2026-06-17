@@ -3,6 +3,7 @@ import Header from './components/Header'
 import PrepareScreen from './pages/PrepareScreen'
 import InterviewScreen from './pages/InterviewScreen'
 import FeedbackScreen from './pages/FeedbackScreen'
+import StepsScreen from './pages/StepsScreen'
 import { ConversationProvider } from '@elevenlabs/react'
 
 function AppContent() {
@@ -10,6 +11,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <Header />
+      {screen === 'steps'     && <StepsScreen />}
       {screen === 'prepare'   && <PrepareScreen />}
       {screen === 'interview' && <InterviewScreen />}
       {screen === 'feedback'  && <FeedbackScreen />}

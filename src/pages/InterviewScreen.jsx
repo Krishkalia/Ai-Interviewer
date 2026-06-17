@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { useSpeech } from '../hooks/useSpeech'
+import { useSpeechOffline } from '../hooks/useSpeechOffline'
 import { generateReport } from '../utils/gemini'
 import Swal from 'sweetalert2'
 
@@ -9,8 +10,15 @@ import { ThreeDAvatar } from '../components/ThreeDAvatar'
 import { UserCamera } from '../components/UserCamera'
 
 export default function InterviewScreen() {
-  const { apiKey, role, resumeData, selectedMic, setSelectedMic, setReport, setScreen, convError, setConvError } = useApp()
-  const { startSession, stopSession, isSpeaking, isUserSpeaking, transcript, history, questionCount, status, isMuted, setMuted } = useSpeech()
+  const { apiKey, role, resumeData, selectedMic, setSelectedMic, setReport, setScreen, convError, setConvError, offlineMode, modelProgress } = useApp()
+  
+  const onlineSpeech = useSpeech()
+  const offlineSpeech = useSpeechOffline()
+  
+  const { 
+    startSession, stopSession, isSpeaking, isUserSpeaking, 
+    transcript, history, questionCount, status, isMuted, setMuted, streamingText 
+  } = offlineMode ? offlineSpeech : onlineSpeech
  
   const [timer, setTimer] = useState('00:00')
   const [devices, setDevices] = useState([])
@@ -124,11 +132,11 @@ export default function InterviewScreen() {
              )}
 
              {/* Internal AI Subtitles Overlay */}
-             {isSpeaking && aiMessage && (
+             {isSpeaking && (aiMessage || streamingText) && (
                <div className="absolute bottom-6 left-0 w-full px-6 z-10 animate-in fade-in slide-in-from-bottom-2">
                  <div className="glass-panel px-5 py-3 rounded-2xl border border-white/10 text-center backdrop-blur-xl">
-                   <p className="text-sm md:text-base font-bold text-on-surface line-clamp-3">
-                     {aiMessage}
+                   <p className={`text-sm md:text-base font-bold text-on-surface line-clamp-3 ${streamingText === 'Thinking...' ? 'animate-pulse text-primary/80' : ''}`}>
+                     {streamingText || aiMessage}
                    </p>
                  </div>
                </div>
@@ -194,6 +202,27 @@ export default function InterviewScreen() {
              <p className="text-sm text-on-surface-variant mb-6">{convError}</p>
              <button onClick={() => window.location.reload()} className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all">Reload Session</button>
            </div>
+        </div>
+      )}
+
+      {/* Model Loading Overlay (Offline Mode Only) */}
+      {offlineMode && status === 'loading' && (
+        <div className="absolute inset-0 z-[70] bg-[#0b1326] flex items-center justify-center p-6 text-center">
+          <div className="max-w-md w-full">
+            <div className="mb-8 relative">
+              <div className="w-32 h-32 rounded-full border-4 border-primary/20 border-t-primary animate-spin mx-auto" />
+              <div className="absolute inset-0 flex items-center justify-center font-headline font-black text-2xl text-primary">
+                {modelProgress}%
+              </div>
+            </div>
+            <h3 className="text-2xl font-black mb-4 tracking-tight">Initializing Brain...</h3>
+            <p className="text-on-surface-variant mb-8 leading-relaxed">
+              We're loading <strong>Llama-3</strong> and <strong>Whisper</strong> into your GPU. This 5GB download happens only once and enables a 100% private, offline experience.
+            </p>
+            <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+               <div className="h-full bg-primary transition-all duration-500" style={{ width: `${modelProgress}%` }} />
+            </div>
+          </div>
         </div>
       )}
     </div>
