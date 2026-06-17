@@ -20,3 +20,5 @@ export async function extractTextFromPdf(file) {
   if (result.length < 50) throw new Error('Could not extract text from this PDF.')
   return result
 }
+
+
